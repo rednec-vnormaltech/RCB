@@ -1,0 +1,136 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
+
+namespace grafik
+{
+    public partial class Form1 : Form
+    {
+        private string _pathToHistory; // это адрес для строки с путём к  данным
+        
+        public Form1()
+        {
+            InitializeComponent();
+          
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            chart1.Series[0].Points.Clear();
+            chart1.Series[1].Points.Clear();
+            using (StreamReader reader = File.OpenText(_pathToHistory))
+            {
+               int i = 0;
+                if (!reader.EndOfStream)
+                    reader.ReadLine();
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+
+                    string[] mas =  line.Split(' ');
+
+                    Kandle kandle = new Kandle(mas);
+
+                    //DateTime dt = DateTime.ParseExact(mas[0] + mas[1], "yyyyMMddHHmmss", null);
+                    //double open = double.Parse(mas[2]);
+                    //decimal high = decimal.Parse(mas[3]); 
+                    //double low = double.Parse(mas[4]); 
+                    //double close = double.Parse(mas[5]);
+                    //int volume = int.Parse(mas[6]);
+
+
+
+
+
+                    
+                   
+                    chart1.Series[0].Points.AddXY(i, kandle.HighPriced, kandle.LowPriced, kandle.OpenPriced, kandle.ClosePriced);
+
+                   //  //adding low
+                   //chart1.Series[0].Points[i].YValues[1] = kandle.LowPriced; 
+                   //  //adding open
+                   //  chart1.Series[0].Points[i].YValues[2] = kandle.OpenPriced;
+                   //  // adding close
+                   //chart1.Series[0].Points[i].YValues[3] = kandle.ClosePriced;
+                  
+
+                    //chart1.Series[1].Points.AddXY(i, kandle.ClosePriced);
+                    chart2.Series[0].Points.AddXY(i, kandle.Volume);
+
+
+                    //richTextBox1.Text = richTextBox1.Text +"open = "+ mas[2] + " high = " + mas[3] + " low = " + mas[4]+ " close= " + mas[5]+"\n";
+                        i++;
+                    
+                        
+                    
+                    
+                 
+                   
+
+                }
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //добавление маштабирования по оси X
+            //chart1.ChartAreas[0].AxisX.ScaleView.Zoom(0, 830);
+            chart1.ChartAreas[0].CursorX.IsUserEnabled = true;
+            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = true;
+            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
+          
+
+            //добавление маштабирования по оси Y
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoom(18900,19050);
+            chart1.ChartAreas[0].CursorY.IsUserEnabled = true;
+            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].AxisY.ScrollBar.IsPositionedInside = true;
+
+            // Параметр 0 отключает сетку
+            chart1.ChartAreas[0].AxisX.MajorGrid.LineWidth = 0;
+            chart1.ChartAreas[0].AxisY.MajorGrid.LineWidth = 0;
+
+            chart1.Series[0].ChartType = SeriesChartType.Candlestick;
+            chart1.Series[0]["OpenCloseStyle"] = "Triangle";
+            chart1.Series[0]["ShowOpenClose"] = "Both";
+            chart1.Series[0]["PointWidth"] = "0.3";
+            chart1.Series[0]["PriceUpColor"] = "Green";
+            chart1.Series[0]["PriceDownColor"] = "Blue";
+
+           
+        }
+        
+        private void button2_Click(object sender, EventArgs e)
+        // создаём стандартное спецОкошко для указания файла с историей
+        {
+            OpenFileDialog myDialog = new OpenFileDialog
+            {
+                // создаём стандартное спецОкошко для указания файла с историей
+                CheckFileExists = true,
+                Multiselect = false
+            };
+
+            myDialog.ShowDialog();
+
+            if (myDialog.FileName != "") // если хоть что-то выбрано и это свечи
+            {
+                // здесь происходит сохранение адреса выбранного фала.
+                // по хорошему надо бы здесь поставить проверку, что в нём лежит
+                _pathToHistory = myDialog.FileName;
+                label1.Text = _pathToHistory;
+            }
+        }
+
+        
+    }
+}
